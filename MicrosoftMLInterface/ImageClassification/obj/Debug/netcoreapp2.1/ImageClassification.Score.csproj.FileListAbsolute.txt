@@ -9,3 +9,14 @@ C:\Users\intern\Desktop\projects\DeepLearning_ImageClassification_TensorFlow\Ima
 C:\Users\intern\Desktop\projects\DeepLearning_ImageClassification_TensorFlow\ImageClassification\bin\Debug\netcoreapp2.1\ImageClassification.Score.pdb
 C:\Users\intern\Desktop\projects\DeepLearning_ImageClassification_TensorFlow\ImageClassification\obj\Debug\netcoreapp2.1\ImageClassification.Score.dll
 C:\Users\intern\Desktop\projects\DeepLearning_ImageClassification_TensorFlow\ImageClassification\obj\Debug\netcoreapp2.1\ImageClassification.Score.pdb
+D:\projects\Python projects\ArrowsAndCrosses\MicrosoftMLInterface\ImageClassification\bin\Debug\netcoreapp2.1\ImageClassification.Score.deps.json
+D:\projects\Python projects\ArrowsAndCrosses\MicrosoftMLInterface\ImageClassification\bin\Debug\netcoreapp2.1\ImageClassification.Score.runtimeconfig.json
+D:\projects\Python projects\ArrowsAndCrosses\MicrosoftMLInterface\ImageClassification\bin\Debug\netcoreapp2.1\ImageClassification.Score.runtimeconfig.dev.json
+D:\projects\Python projects\ArrowsAndCrosses\MicrosoftMLInterface\ImageClassification\bin\Debug\netcoreapp2.1\ImageClassification.Score.dll
+D:\projects\Python projects\ArrowsAndCrosses\MicrosoftMLInterface\ImageClassification\bin\Debug\netcoreapp2.1\ImageClassification.Score.pdb
+D:\projects\Python projects\ArrowsAndCrosses\MicrosoftMLInterface\ImageClassification\obj\Debug\netcoreapp2.1\ImageClassification.Score.csprojAssemblyReference.cache
+D:\projects\Python projects\ArrowsAndCrosses\MicrosoftMLInterface\ImageClassification\obj\Debug\netcoreapp2.1\ImageClassification.Score.csproj.CoreCompileInputs.cache
+D:\projects\Python projects\ArrowsAndCrosses\MicrosoftMLInterface\ImageClassification\obj\Debug\netcoreapp2.1\ImageClassification.Score.AssemblyInfoInputs.cache
+D:\projects\Python projects\ArrowsAndCrosses\MicrosoftMLInterface\ImageClassification\obj\Debug\netcoreapp2.1\ImageClassification.Score.AssemblyInfo.cs
+D:\projects\Python projects\ArrowsAndCrosses\MicrosoftMLInterface\ImageClassification\obj\Debug\netcoreapp2.1\ImageClassification.Score.dll
+D:\projects\Python projects\ArrowsAndCrosses\MicrosoftMLInterface\ImageClassification\obj\Debug\netcoreapp2.1\ImageClassification.Score.pdb

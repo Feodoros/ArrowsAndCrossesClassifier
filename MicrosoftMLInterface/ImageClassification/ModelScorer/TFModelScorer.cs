@@ -30,7 +30,7 @@ namespace ImageClassification.ModelScorer
         {
             public const int imageHeight = 160;
             public const int imageWidth = 160;
-            public const float mean = 117;
+            public const float mean = 3;
             public const bool channelsLast = true;
         }
 
@@ -40,10 +40,10 @@ namespace ImageClassification.ModelScorer
             // which is installed by Visual Studio AI Tools
 
             // input tensor name
-            public const string inputTensorName = "input";
+            public const string inputTensorName = "mobilenetv2_1.00_160_input";
 
             // output tensor name
-            public const string outputTensorName = "softmax2";
+            public const string outputTensorName = "dense/Sigmoid";
         }
 
         public void Score()
@@ -64,12 +64,13 @@ namespace ImageClassification.ModelScorer
 
             var data = mlContext.Data.LoadFromTextFile<ImageNetData>(dataLocation, hasHeader: true);
 
-            var pipeline = mlContext.Transforms.LoadImages(outputColumnName: "input", imageFolder: imagesFolder, inputColumnName: nameof(ImageNetData.ImagePath))
-                            .Append(mlContext.Transforms.ResizeImages(outputColumnName: "input", imageWidth: ImageNetSettings.imageWidth, imageHeight: ImageNetSettings.imageHeight, inputColumnName: "input"))
-                            .Append(mlContext.Transforms.ExtractPixels(outputColumnName: "input", interleavePixelColors: ImageNetSettings.channelsLast, offsetImage: ImageNetSettings.mean))
-                            .Append(mlContext.Model.LoadTensorFlowModel(modelLocation).
-                            ScoreTensorFlowModel(outputColumnNames: new[] { "softmax2" },
-                                                inputColumnNames: new[] { "input" }, addBatchDimensionInput:true));
+            var pipeline0 = mlContext.Transforms.LoadImages(outputColumnName: "input", imageFolder: imagesFolder, inputColumnName: nameof(ImageNetData.ImagePath));
+
+            var pipeline1 = pipeline0.Append(mlContext.Transforms.ResizeImages(outputColumnName: "input", imageWidth: ImageNetSettings.imageWidth, imageHeight: ImageNetSettings.imageHeight, inputColumnName: "input"));
+            var pipeline2 = pipeline1.Append(mlContext.Transforms.ExtractPixels(outputColumnName: "input", interleavePixelColors: ImageNetSettings.channelsLast, offsetImage: ImageNetSettings.mean));
+            var pipeline = pipeline2.Append(mlContext.Model.LoadTensorFlowModel(modelLocation).
+                            ScoreTensorFlowModel(outputColumnNames: new[] { "dense/Sigmoid" },
+                                                inputColumnNames: new[] { "mobilenetv2_1.00_160_input" }, addBatchDimensionInput:false));
                         
             ITransformer model = pipeline.Fit(data);
 

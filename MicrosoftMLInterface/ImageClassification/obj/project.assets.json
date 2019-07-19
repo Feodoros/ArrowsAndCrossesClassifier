@@ -4316,11 +4316,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\projects\\Final version\\MicrosoftMLInterface\\ImageClassification\\ImageClassification.Score.csproj",
+      "projectUniqueName": "D:\\projects\\Python projects\\ArrowsAndCrosses\\MicrosoftMLInterface\\ImageClassification\\ImageClassification.Score.csproj",
       "projectName": "ImageClassification.Score",
-      "projectPath": "D:\\projects\\Final version\\MicrosoftMLInterface\\ImageClassification\\ImageClassification.Score.csproj",
+      "projectPath": "D:\\projects\\Python projects\\ArrowsAndCrosses\\MicrosoftMLInterface\\ImageClassification\\ImageClassification.Score.csproj",
       "packagesPath": "C:\\Users\\intern\\.nuget\\packages\\",
-      "outputPath": "D:\\projects\\Final version\\MicrosoftMLInterface\\ImageClassification\\obj\\",
+      "outputPath": "D:\\projects\\Python projects\\ArrowsAndCrosses\\MicrosoftMLInterface\\ImageClassification\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
