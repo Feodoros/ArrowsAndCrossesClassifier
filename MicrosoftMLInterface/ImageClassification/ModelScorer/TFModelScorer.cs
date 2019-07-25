@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.IO;
 using Microsoft.ML;
 using ImageClassification.ImageDataStructures;
 using static ImageClassification.ModelScorer.ConsoleHelpers;
 using static ImageClassification.ModelScorer.ModelHelpers;
-using Microsoft.ML.Data;
-using Microsoft.ML.Transforms.Image;
 
 namespace ImageClassification.ModelScorer
 {
@@ -33,8 +30,8 @@ namespace ImageClassification.ModelScorer
 
         public struct ImageNetSettings
         {
-            public const int imageHeight = 150;
-            public const int imageWidth = 150;
+            public const int imageHeight = 160;
+            public const int imageWidth = 160;
             public const float mean = 3;       
             public const bool channelsLast = true;
             public const float scale = 1 / 255f;
@@ -70,15 +67,13 @@ namespace ImageClassification.ModelScorer
             Console.WriteLine($"Default parameters: image size=({ImageNetSettings.imageWidth},{ImageNetSettings.imageHeight}), image mean: {ImageNetSettings.mean}");
 
             var data = mlContext.Data.LoadFromTextFile<ImageNetData>(dataLocation, hasHeader: true);
-
-            // mlContext.Transforms.Conversion.MapValueToKey(outputColumnName: InceptionSettings.input, inputColumnName: nameof(ImageNetData.Label))
-
+           
             var pipeline = mlContext.Transforms.LoadImages(outputColumnName: InceptionSettings.input, imageFolder: imagesFolder, inputColumnName: nameof(ImageNetData.ImagePath))
                 .Append(mlContext.Transforms.ResizeImages(outputColumnName: InceptionSettings.input, imageWidth: ImageNetSettings.imageWidth, imageHeight: ImageNetSettings.imageHeight, inputColumnName: InceptionSettings.input))
                 .Append(mlContext.Transforms.ExtractPixels(outputColumnName: InceptionSettings.input, interleavePixelColors: ImageNetSettings.channelsLast, offsetImage: ImageNetSettings.mean, scaleImage: ImageNetSettings.scale))
                 .Append(mlContext.Model.LoadTensorFlowModel(modelLocation)
                     .ScoreTensorFlowModel(outputColumnNames: new[] { InceptionSettings.output },
-                                          inputColumnNames: new[] { InceptionSettings.input }, addBatchDimensionInput: false));        
+                                          inputColumnNames:  new[] { InceptionSettings.input }, addBatchDimensionInput: false));        
                         
             ITransformer model = pipeline.Fit(data);
 
