@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.ML;
@@ -10,84 +11,68 @@ namespace ImageClassification.ModelScorer
 {
     public class TFModelScorer
     {
-        private readonly string dataLocation;
-        private readonly string imagesFolder;
-        private readonly string modelLocation;
-        private readonly string labelsLocation;
         private readonly MLContext mlContext;
-        private static string ImageReal = nameof(ImageReal);
+        private readonly ITransformer model;
+
+        // Default parameters
+        private int imageHeight = 160;
+        private int imageWidth = 160;
+        private float mean = 3;
+        private bool channelsLast = true;
+        private float scale = 1 / 255f;
+
+        private readonly string input = "lambda_input";
+        private readonly string output = "dense/Sigmoid";
 
         public object ImagePixelExtractorTransform { get; private set; }
 
-        public TFModelScorer(string dataLocation, string imagesFolder, string modelLocation, string labelsLocation)
+        public TFModelScorer(string modelLocation, string inputTensor, string outputTensor)
         {
-            this.dataLocation = dataLocation;
-            this.imagesFolder = imagesFolder;
-            this.modelLocation = modelLocation;
-            this.labelsLocation = labelsLocation;
+            input = inputTensor;
+            output = outputTensor;
+
             mlContext = new MLContext();
+            model = LoadModel(modelLocation);
         }
 
-        public struct ImageNetSettings
-        {
-            public const int imageHeight = 160;
-            public const int imageWidth = 160;
-            public const float mean = 3;       
-            public const bool channelsLast = true;
-            public const float scale = 1 / 255f;
-        }
-
-        public struct InceptionSettings
-        {
-            // for checking tensor names, you can use tools like Netron,
-            // which is installed by Visual Studio AI Tools
-
-            // input tensor name
-            public const string input = "lambda_input";
-
-            // output tensor name
-            public const string output = "dense/Sigmoid";
-
-        }
-
-        public void Score()
-        {
-            var model = LoadModel(dataLocation, imagesFolder, modelLocation);
-
-            var predictions = PredictDataUsingModel(dataLocation, imagesFolder, labelsLocation, model).ToArray();
-
-        }
-
-        private PredictionEngine<ImageNetData, ImageNetPrediction> LoadModel(string dataLocation, string imagesFolder, string modelLocation)
+        private ITransformer LoadModel(string modelLocation)
         {
             ConsoleWriteHeader("Read model");
             Console.WriteLine($"Model location: {modelLocation}");
-            Console.WriteLine($"Images folder: {imagesFolder}");
-            Console.WriteLine($"Training file: {dataLocation}");
-            Console.WriteLine($"Default parameters: image size=({ImageNetSettings.imageWidth},{ImageNetSettings.imageHeight}), image mean: {ImageNetSettings.mean}");
+            Console.WriteLine($"Parameters: image size=({imageWidth},{imageHeight}), image mean: {mean}");
 
-            var data = mlContext.Data.LoadFromTextFile<ImageNetData>(dataLocation, hasHeader: true);
-           
-            var pipeline = mlContext.Transforms.LoadImages(outputColumnName: InceptionSettings.input, imageFolder: imagesFolder, inputColumnName: nameof(ImageNetData.ImagePath))
-                .Append(mlContext.Transforms.ResizeImages(outputColumnName: InceptionSettings.input, imageWidth: ImageNetSettings.imageWidth, imageHeight: ImageNetSettings.imageHeight, inputColumnName: InceptionSettings.input))
-                .Append(mlContext.Transforms.ExtractPixels(outputColumnName: InceptionSettings.input, interleavePixelColors: ImageNetSettings.channelsLast, offsetImage: ImageNetSettings.mean, scaleImage: ImageNetSettings.scale))
+            // A way to avoid undesirable data validation
+            var placeholder = mlContext.Data.CreateTextLoader<ImageNetData>().Load("");
+            var pathholder = "";
+
+            var pipeline = mlContext.Transforms.LoadImages(outputColumnName: input, imageFolder: pathholder, inputColumnName: nameof(ImageNetData.ImagePath))
+                .Append(mlContext.Transforms.ResizeImages(outputColumnName: input, imageWidth: imageWidth, imageHeight: imageHeight, inputColumnName: input))
+                .Append(mlContext.Transforms.ExtractPixels(outputColumnName: input, interleavePixelColors: channelsLast, offsetImage: mean, scaleImage: scale))
                 .Append(mlContext.Model.LoadTensorFlowModel(modelLocation)
-                    .ScoreTensorFlowModel(outputColumnNames: new[] { InceptionSettings.output },
-                                          inputColumnNames:  new[] { InceptionSettings.input }, addBatchDimensionInput: false));        
-                        
-            ITransformer model = pipeline.Fit(data);
+                    .ScoreTensorFlowModel(outputColumnNames: new[] { output },
+                                          inputColumnNames:  new[] { input }, addBatchDimensionInput: false));        
+                       
+            ITransformer model = pipeline.Fit(placeholder);
 
-            var predictionEngine = mlContext.Model.CreatePredictionEngine<ImageNetData, ImageNetPrediction>(model);           
-
-            // mlContext.Model.Save(model, data.Schema, "model.zip");
-
-            return predictionEngine;
+            return model;
         }
 
-        protected IEnumerable<ImageNetData> PredictDataUsingModel(string testLocation, 
-                                                                  string imagesFolder, 
-                                                                  string labelsLocation, 
-                                                                  PredictionEngine<ImageNetData, ImageNetPrediction> model)
+        public void SetImageParameters(int height, int width, float mean, float scale, bool channelsLast)
+        {
+            this.imageHeight = height;
+            this.imageWidth = width;
+            this.mean = mean;
+            this.scale = scale;
+            this.channelsLast = channelsLast;
+        }
+
+        public void SaveModel(string path)
+        {
+            var placeholder = mlContext.Data.CreateTextLoader<ImageNetData>().Load("");
+            mlContext.Model.Save(model, placeholder.Schema, Path.Combine(path, "model.zip"));
+        }
+
+        public IEnumerable<ImageNetData> PredictDataUsingModel(string testLocation, string imagesFolder, string labelsLocation)
         {
             ConsoleWriteHeader("Classificate images");
             Console.WriteLine($"Images folder: {imagesFolder}");
@@ -99,16 +84,18 @@ namespace ImageClassification.ModelScorer
             double fp = 0;
             double fn = 0;
 
-            var labels = ModelHelpers.ReadLabels(labelsLocation);
+            var labels = ReadLabels(labelsLocation);
 
             var testData = ImageNetData.ReadFromCsv(testLocation, imagesFolder);
-            var count = 0;
+            var count = 1;
 
             Console.ForegroundColor = ConsoleColor.Red;
 
             foreach (var sample in testData)
             {
-                var probs = model.Predict(sample).PredictedLabels;
+                var engine = mlContext.Model.CreatePredictionEngine<ImageNetData, ImageNetPrediction>(model);
+
+                var probs = engine.Predict(sample).PredictedLabels;
                 var imageData = new ImageNetDataProbability()
                 {
                     ImagePath = sample.ImagePath,
@@ -124,7 +111,7 @@ namespace ImageClassification.ModelScorer
                 fn += imageData.Label == labels[1] && imageData.PredictedLabel == labels[0] ? 1 : 0;
 
                 count++;
-                if (count % 100 == 0)
+                if (count % 1000 == 0)
                 {
                     Console.WriteLine($"{count} images have been processed");
                 }
@@ -137,7 +124,6 @@ namespace ImageClassification.ModelScorer
             double rec = tp / (tp + fn);
             double f1 = 2 * (prec * rec) / (prec + rec);
 
-           
             Console.WriteLine($"Accuracy: {acc}%, precision: {prec}, recall: {rec}, f1 score: {f1}");
         }
     }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
+using Microsoft.ML;
 
 namespace ImageClassification.ImageDataStructures
 {
@@ -12,7 +13,7 @@ namespace ImageClassification.ImageDataStructures
 
         [Microsoft.ML.Data.LoadColumn(1)]
         public string Label;
-
+  
         public static IEnumerable<ImageNetData> ReadFromCsv(string file, string folder)
         {
             return File.ReadAllLines(file)
