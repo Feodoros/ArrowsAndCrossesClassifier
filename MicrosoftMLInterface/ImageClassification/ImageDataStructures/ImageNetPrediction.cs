@@ -5,7 +5,7 @@ namespace ImageClassification.ImageDataStructures
 {
     public class ImageNetPrediction
     {
-        [ColumnName(TFModelScorer.InceptionSettings.output)]
+        [ColumnName(TFModelScorer.output)] 
         public float[] PredictedLabels;
     }
 }

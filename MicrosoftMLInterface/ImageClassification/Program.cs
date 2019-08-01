@@ -14,13 +14,12 @@ namespace ImageClassification
         private static readonly string labelsTxt = Path.Combine(assetsPath, "inputs", "catsdogs", "labels.txt");
         private static readonly string pathToModel = Path.Combine(assetsPath, "inputs", "catsdogsNet");
 
-        
-
         static void Main(string[] args)
         {
-            var modelScorer = new TFModelScorer(pathToModel, "lambda_input", "dense/Sigmoid");
-            modelScorer.PredictDataUsingModel(tagsTsv, imagesFolder, labelsTxt);
+            var modelScorer = new TFModelScorer(pathToModel);
 
+            modelScorer.PredictDataUsingModel(tagsTsv, imagesFolder, labelsTxt);
+            
             ConsoleHelpers.ConsolePressAnyKey();
         }
 
