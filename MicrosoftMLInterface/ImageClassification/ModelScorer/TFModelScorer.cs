@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Collections.Generic;
 using System.Linq;
 using Microsoft.ML;
 using ImageClassification.ImageDataStructures;
@@ -67,7 +66,7 @@ namespace ImageClassification.ModelScorer
             mlctx.Model.Save(model, schema, Path.Combine(path, "model.zip"));
         }
 
-        public void PredictDataUsingModel(string testLocation, string imagesFolder, string labelsLocation)
+        public void TestWithMetrics(string testLocation, string imagesFolder, string labelsLocation)
         {
             
             var watch = System.Diagnostics.Stopwatch.StartNew();
@@ -126,6 +125,33 @@ namespace ImageClassification.ModelScorer
             var measuredTime = watch.ElapsedMilliseconds / 1000;
 
             Console.WriteLine($"Made predictions for {dataLength} images in {measuredTime} seconds. Accuracy: {acc}%, precision: {prec}, recall: {rec}, f1 score: {f1}");
+        }
+
+        public void PredictData(string imageListPath, string imagesFolder, string labelsLocation, string resultPath)
+        {
+            var labels = ReadLabels(labelsLocation);
+            var testData = ImageNetData.ReadFromCsvUnlabeled(imageListPath, imagesFolder);
+
+            Console.ForegroundColor = ConsoleColor.Red;
+
+            using (var writetext = new StreamWriter(resultPath))
+            {
+                foreach (var sample in testData)
+                {
+                    var engine = mlctx.Model.CreatePredictionEngine<ImageNetData, ImageNetPrediction>(model);
+
+                    var probs = engine.Predict(sample).PredictedLabels;
+                    var imageData = new ImageNetDataProbability()
+                    {
+                        ImagePath = sample.ImagePath,
+                        Label = sample.Label
+                    };
+                    (imageData.PredictedLabel, imageData.Probability) = GetBestLabel(labels, probs);
+
+                    writetext.WriteLine($"{imageData.ImagePath}\t{imageData.PredictedLabel}");
+                    //imageData.ConsoleWrite();
+                }
+            }
         }
     }
 }

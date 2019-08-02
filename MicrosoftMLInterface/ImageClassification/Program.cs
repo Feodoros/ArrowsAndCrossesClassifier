@@ -10,6 +10,7 @@ namespace ImageClassification
         private static readonly string assetsPath = GetAbsolutePath(assetsRelativePath);
 
         private static readonly string tagsTsv = @"D:\Datasets\CatsDogs\image_list.tsv";
+        private static readonly string notLabeled = @"D:\Datasets\CatsDogs\non-labeled.tsv";
         private static readonly string imagesFolder = @"D:\Datasets\CatsDogs";
         private static readonly string labelsTxt = Path.Combine(assetsPath, "inputs", "catsdogs", "labels.txt");
         private static readonly string pathToModel = Path.Combine(assetsPath, "inputs", "catsdogsNet");
@@ -18,7 +19,7 @@ namespace ImageClassification
         {
             var modelScorer = new TFModelScorer(pathToModel);
 
-            modelScorer.PredictDataUsingModel(tagsTsv, imagesFolder, labelsTxt);
+            modelScorer.PredictData(notLabeled, imagesFolder, labelsTxt, Path.Combine(assetsPath, "Result.tsv"));
             
             ConsoleHelpers.ConsolePressAnyKey();
         }

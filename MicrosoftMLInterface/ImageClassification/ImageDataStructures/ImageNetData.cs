@@ -20,6 +20,11 @@ namespace ImageClassification.ImageDataStructures
              .Select(x => x.Split('\t'))
              .Select(x => new ImageNetData { ImagePath = Path.Combine(folder, x[0]), Label = x[1] } );
         }
+        public static IEnumerable<ImageNetData> ReadFromCsvUnlabeled(string file, string folder)
+        {
+            return File.ReadAllLines(file)
+             .Select(x => new ImageNetData { ImagePath = Path.Combine(folder, x), Label = "" });
+        }
     }
 
     public class ImageNetDataProbability : ImageNetData
